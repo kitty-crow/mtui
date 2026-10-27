@@ -37,6 +37,20 @@ describe('terminal layout', () => {
     expect(MetricFormat.percent(0)).toBe('0.0%');
     expect(MetricFormat.bytes(1024 ** 3)).toBe('1.0 GiB');
   });
+  test('counts GPU sensor channels when the additional hardware provider is unavailable', async () => {
+    const { monitor, identity } = await demoMonitor();
+    const snapshot = monitor.getSnapshot();
+    const graphics = snapshot.readings.graphics;
+    const cpu = snapshot.readings.cpu;
+    const data = { ...snapshot, readings: { ...snapshot.readings,
+      sensors: { value: null, status: 'unavailable' as const, updatedAt: null, message: 'Hardware driver unavailable' },
+      cpu: { ...cpu, value: cpu.value === null ? null : { ...cpu.value, temperature: null, coreTemperatures: [] } },
+      graphics: { ...graphics, value: graphics.value?.map(gpu => ({ ...gpu, temperature: 40, memoryTemperature: null, fanPercent: 30 })) ?? null },
+    } };
+    const output = renderToString(<Dashboard snapshot={data} history={monitor.history} identity={identity} navigation={new NavigationController().getState()} width={110} height={32} offset={0} gpuIndex={0} interval={1000} paused={false} motion={false} ascii={false} remote={null} endpoint={null} />, { columns: 110 });
+    expect(Bun.stripANSI(output)).toContain('2 temperatures · 2 fan channels');
+    expect(output).toContain('Hardware driver unavailable');
+  });
 });
 
 describe('navigation', () => {

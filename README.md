@@ -104,7 +104,11 @@ CPU load, per-thread usage and memory statistics use the operating system's coun
 
 Available CPU sensor channels feed the processor overview and JSON metrics as well as the Sensors screen. NVIDIA memory temperatures are queried independently of load and fan counters, so an unsupported thermal channel does not interrupt other GPU readings. Missing measurements are `null` in JSON and appear as `N/A` with an unavailable status in the sensor table.
 
-Platform adapters discover existing providers automatically. On Windows, CPU and motherboard temperatures require an active compatible hardware-monitor WMI provider; mTUI reports when none is accessible. Hardware access may require additional permissions on any operating system. A sensor that the hardware or driver does not expose remains unavailable.
+Platform adapters discover available readings automatically. Windows uses an existing compatible WMI provider when present, or starts an integrated, headless LibreHardwareMonitor library reader. The library is downloaded from its official release on first use, verified against a pinned SHA-256 digest, and cached under `%LOCALAPPDATA%\mTUI\sensors`. No GUI application needs to run.
+
+For Windows CPU and motherboard sensors, run `mtui.exe --setup-sensors` once from an administrator terminal. This downloads and installs the pinned PawnIO hardware-access driver. Setup reports if Windows needs a restart. Run subsequent local monitoring sessions as administrator for privileged sensors; remote clients do not need elevation. Normal monitoring never installs drivers or requests elevation. An existing WMI provider can still supply readings without this setup.
+
+Hardware and firmware determine which sensors exist. Unsupported measurements remain unavailable.
 
 The [platform guide](docs/platforms.md) describes available readings and common gaps. Temperature colours are visual guides at 75°C and 90°C, rather than device-specific thermal limits.
 

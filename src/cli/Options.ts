@@ -12,9 +12,10 @@ export interface Options {
   readonly serve: boolean;
   readonly api: boolean;
   readonly connect: string | null;
+  readonly setupSensors: boolean;
 }
 
-const flags = new Set(['--demo', '--once', '--json', '--no-colour', '--no-color', '--no-motion', '--ascii', '--help', '-h', '--version', '-v', '--serve', '--no-api']);
+const flags = new Set(['--demo', '--once', '--json', '--no-colour', '--no-color', '--no-motion', '--ascii', '--help', '-h', '--version', '-v', '--serve', '--no-api', '--setup-sensors']);
 
 /** Strict CLI parsing catches misspelled switches before hardware discovery. */
 export class OptionParser {
@@ -33,6 +34,7 @@ export class OptionParser {
     if (connect !== null && switches.has('--serve')) throw new Error('--connect and --serve are separate operating modes');
     if (connect !== null && switches.has('--demo')) throw new Error('--demo cannot be combined with --connect');
     if (switches.has('--serve') && switches.has('--no-api')) throw new Error('--serve requires the API');
+    if (switches.has('--setup-sensors') && (connect !== null || switches.has('--demo') || switches.has('--serve') || switches.has('--once') || switches.has('--json'))) throw new Error('--setup-sensors is a separate operating mode');
     return {
       interval: this.number(values.get('--interval') ?? '1000', '--interval', 250, 10_000),
       history: this.number(values.get('--history') ?? '120', '--history', 10, 3600),
@@ -40,7 +42,7 @@ export class OptionParser {
       colour: !switches.has('--no-colour') && !switches.has('--no-color'),
       motion: !switches.has('--no-motion'), ascii: switches.has('--ascii'),
       help: switches.has('--help') || switches.has('-h'), version: switches.has('--version') || switches.has('-v'),
-      serve: switches.has('--serve'), api: !switches.has('--no-api'), connect,
+      serve: switches.has('--serve'), api: !switches.has('--no-api'), connect, setupSensors: switches.has('--setup-sensors'),
     };
   }
 

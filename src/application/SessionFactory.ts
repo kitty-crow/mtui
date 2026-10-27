@@ -24,17 +24,18 @@ export class SessionFactory {
     const registry = new CollectorRegistry();
     const adapters = new PlatformFactory();
     if (options.demo) new DemoScenario().register(registry);
-    if (!options.demo) this.registerLocal(registry, adapters);
+    const cleanup = options.demo ? () => {} : this.registerLocal(registry, adapters);
     const monitor = new MonitorEngine(new LocalSnapshotSource(registry), new HistoryStore(options.history), options.interval);
-    return new MonitorSession(monitor, { host: { hostname: options.demo ? 'demo-workstation' : hostname(), platform: platform(), release: release(), architecture: arch() }, version, demo: options.demo }, null);
+    return new MonitorSession(monitor, { host: { hostname: options.demo ? 'demo-workstation' : hostname(), platform: platform(), release: release(), architecture: arch() }, version, demo: options.demo }, null, cleanup);
   }
 
-  private registerLocal(registry: CollectorRegistry, adapters: PlatformFactory): void {
+  private registerLocal(registry: CollectorRegistry, adapters: PlatformFactory): () => void {
     const sensors = new SharedSensorSource(adapters.sensors());
     registry.register('cpu', new CpuCollector(systemApi, sensors));
     registry.register('memory', new MemoryCollector(systemApi));
     registry.register('graphics', new GraphicsCollector(systemApi, adapters.graphics(), adapters.nvidia()));
     registry.register('sensors', new SensorCollector(sensors));
+    return () => sensors.close();
   }
 
   private async remote(options: Options): Promise<MonitorSession> {

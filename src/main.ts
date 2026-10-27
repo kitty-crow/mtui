@@ -8,7 +8,11 @@ try {
   if (!options.colour) { process.env['NO_COLOR'] = '1'; delete process.env['FORCE_COLOR']; }
   if (options.help) console.log(help);
   if (options.version && !options.help) console.log(`mTUI ${version}`);
-  if (!options.help && !options.version) {
+  if (options.setupSensors && !options.help && !options.version) {
+    const { SensorSetup } = await import('./application/SensorSetup.ts');
+    await new SensorSetup().run();
+  }
+  if (!options.help && !options.version && !options.setupSensors) {
     const { Application } = await import('./application/Application.ts');
     await new Application().run(options);
   }

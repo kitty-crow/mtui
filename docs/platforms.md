@@ -13,7 +13,7 @@ mTUI runs on Linux, Windows and macOS through Bun. The terminal and JSON API use
 | NVIDIA load, clocks, power and fan duty | Driver telemetry | Driver telemetry | Generally unavailable |
 | Other graphics load and VRAM | Driver telemetry; Linux DRM counters where exposed | Driver-dependent | Driver-dependent |
 | Processor temperature | Reported sensors | Reported sensors | Reported sensors, where supported |
-| Additional fan, temperature, voltage and power channels | Linux hwmon | Optional WMI hardware-monitor provider | No additional native adapter included |
+| Additional fan, temperature, voltage and power channels | Linux hwmon | Integrated headless library or existing WMI provider | No additional native adapter included |
 
 ## Linux
 
@@ -27,9 +27,13 @@ mTUI does not run sensor detection tools, write sysfs controls or change fan cur
 
 Processor, memory and graphics readings use the Windows facilities supported by systeminformation. NVIDIA driver telemetry is discovered when `nvidia-smi` is available.
 
-Additional motherboard and DIMM sensors can be exposed by a running **LibreHardwareMonitor** or **OpenHardwareMonitor** WMI provider. mTUI checks `root/LibreHardwareMonitor` followed by `root/OpenHardwareMonitor`. The query runs with the current user's permissions. mTUI does not install, start or elevate those programs.
+An existing **LibreHardwareMonitor** or **OpenHardwareMonitor** WMI provider is reused when available. Otherwise, mTUI loads LibreHardwareMonitorLib 0.9.6 in a hidden PowerShell worker. The worker opens the hardware once, updates CPU, motherboard, memory, GPU and controller sensors on demand, and closes its hardware handles when mTUI exits. This works over SSH and without a desktop session.
 
-If no provider is accessible, the extra sensor collector is marked unavailable. Processor, memory and graphics views continue to operate. Reported processor frequencies can be nominal or static, depending on the Windows API and driver.
+Run `mtui.exe --setup-sensors` once from an administrator terminal to prepare the library and install PawnIO 2.2.0. Both downloads come from official, versioned releases and are checked against pinned SHA-256 digests before extraction or execution. A restart is needed only when the installer reports it. Subsequent local hardware reads require an administrator session; remote API clients do not. Monitoring itself never installs a driver or opens an elevation prompt.
+
+The library and its dependencies are cached in `%LOCALAPPDATA%\mTUI\sensors\lhm-0.9.6`. First-use preparation requires internet access; polling is offline after preparation. When using different Windows accounts, prepare the library for each account. mTUI does not start the LibreHardwareMonitor GUI or publish a WMI namespace.
+
+If hardware access is unavailable, the sensor collector reports a short diagnostic while processor load, memory and graphics monitoring continue. A missing driver, insufficient privileges and an unsupported hardware channel are different conditions. Reported processor frequencies can be nominal or static, depending on the Windows API and driver.
 
 ## macOS
 

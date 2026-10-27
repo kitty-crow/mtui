@@ -10,7 +10,7 @@ export class MonitorSession {
   public readonly catalogue: ResourceCatalogue;
   private api: ApiServer | null = null;
 
-  constructor(public readonly monitor: MonitorEngine, public readonly identity: MonitorIdentity, public readonly remote: string | null) {
+  constructor(public readonly monitor: MonitorEngine, public readonly identity: MonitorIdentity, public readonly remote: string | null, private readonly cleanup: () => void = () => {}) {
     this.catalogue = new ResourceCatalogue(monitor, identity);
   }
 
@@ -20,5 +20,5 @@ export class MonitorSession {
     return `http://${settings.hostname}:${port}`;
   }
 
-  public close(): void { this.monitor.stop(); this.api?.stop(); }
+  public close(): void { this.monitor.stop(); this.api?.stop(); this.cleanup(); }
 }

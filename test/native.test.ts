@@ -36,6 +36,6 @@ describe('Windows WMI sensors', () => {
     expect(await source.read()).toMatchObject([{ value: null, unit: '°C' }]);
   });
   test('propagates provider failures to freshness handling', async () => {
-    await expect(new WindowsSensors({ run: async () => { throw new Error('provider unavailable'); } }).read()).rejects.toThrow('provider unavailable');
+    await expect(new WindowsSensors({ run: async () => { throw new Error('provider unavailable'); } }).read()).rejects.toThrow('No accessible Windows hardware-monitor WMI provider');
   });
 });

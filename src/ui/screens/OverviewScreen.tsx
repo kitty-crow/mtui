@@ -9,8 +9,8 @@ import { DataTable } from '../components/DataTable.tsx';
 import { Panel } from '../components/Panel.tsx';
 import { ReadingNotice } from '../components/ReadingNotice.tsx';
 import type { ScreenProps } from '../layout/ScreenProps.ts';
-import { MetricFormat as F } from '../format/MetricFormat.ts';
 import { palette } from '../theme/palette.ts';
+import { SensorCatalogue } from '../../monitoring/SensorCatalogue.ts';
 
 export class OverviewScreen extends PureComponent<ScreenProps> {
   private readonly columns = new GpuColumns();
@@ -18,9 +18,9 @@ export class OverviewScreen extends PureComponent<ScreenProps> {
     const { snapshot, width, height, ascii, offset } = this.props;
     const graphics = snapshot.readings.graphics;
     const gpus = graphics.value ?? [];
-    const sensor = snapshot.readings.sensors.value ?? [];
+    const sensor = new SensorCatalogue().list(snapshot);
     const temperatures = sensor.filter(item => item.unit === '°C' && item.value !== null);
-    const fans = sensor.filter(item => item.unit === 'RPM' && item.value !== null);
+    const fans = sensor.filter(item => item.value !== null && (item.unit === 'RPM' || item.unit === '%' && /fan/i.test(item.label)));
     const leftWidth = Math.floor((width - 1) / 2);
     const { sensorHeight, gpuHeight, tableRows } = new OverviewLayout(height, gpus.length);
     return <Box flexDirection="column" height={height}>
@@ -31,7 +31,7 @@ export class OverviewScreen extends PureComponent<ScreenProps> {
       <Panel title="GRAPHICS" accent={palette.graphics} hint={`${gpus.length} adapters · ${graphics.status}`} height={gpuHeight} ascii={ascii}>
         {gpus.length > 0 ? <DataTable rows={gpus} columns={this.columns.build(width - 4)} rowKey={gpu => gpu.id} offset={offset} limit={tableRows} /> : <ReadingNotice reading={graphics} empty="No graphics adapters reported by the operating system." />}
         <Box flexGrow={1} />
-        <Text color={palette.sensors} wrap="truncate-end">SENSORS <Text color={palette.muted}>{temperatures.length} temperatures · {fans.length} fans{fans[0] ? ` · ${F.label(fans[0].label)} ${F.value(fans[0].value, 'RPM')}` : ''}</Text></Text>
+        <Text color={palette.sensors} wrap="truncate-end">SENSORS <Text color={palette.muted}>{temperatures.length} temperatures · {fans.length} fan channels</Text></Text>
         <Text color={palette.faint}>N/A = unavailable · fan % is duty, RPM is reported separately</Text>
       </Panel>
       {sensorHeight > 0 && <NativeSensorSummary {...this.props} height={sensorHeight} />}

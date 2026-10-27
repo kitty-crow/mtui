@@ -1,8 +1,7 @@
-import type { SensorMetric, SensorUnit } from '../../domain/sensors.ts';
+import type { SensorMetric } from '../../domain/sensors.ts';
 import type { CommandRunner } from './CommandRunner.ts';
 import type { SensorSource } from './SensorSource.ts';
-
-const units: Readonly<Record<string, SensorUnit>> = { Temperature: '°C', Fan: 'RPM', Voltage: 'V', Power: 'W', Control: '%' };
+import { WindowsSensorMapper } from '../windows/WindowsSensorMapper.ts';
 const query = `
 $ErrorActionPreference = 'Stop'
 foreach ($namespace in @('root/LibreHardwareMonitor', 'root/OpenHardwareMonitor')) {
@@ -22,23 +21,9 @@ export class WindowsSensors implements SensorSource {
   constructor(private readonly runner: CommandRunner) {}
 
   public async read(): Promise<readonly SensorMetric[]> {
-    const output = await this.runner.run('powershell.exe', ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', query]);
+    const output = await this.runner.run('powershell.exe', ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', query])
+      .catch(() => { throw new Error('No accessible Windows hardware-monitor WMI provider'); });
     const data: unknown = JSON.parse(output.replace(/^\uFEFF/, ''));
-    const records: unknown[] = Array.isArray(data) ? data : [data];
-    return records.flatMap(record => this.map(record));
-  }
-
-  private map(record: unknown): SensorMetric[] {
-    if (typeof record !== 'object' || record === null) return [];
-    const data = record as Record<string, unknown>;
-    const unit = typeof data['SensorType'] === 'string' ? units[data['SensorType']] : undefined;
-    if (unit === undefined || typeof data['Identifier'] !== 'string') return [];
-    const raw = data['Value'];
-    return [{
-      id: data['Identifier'], label: typeof data['Name'] === 'string' ? data['Name'] : data['Identifier'],
-      device: typeof data['Parent'] === 'string' ? data['Parent'] : 'Hardware', unit,
-      value: typeof raw === 'number' && Number.isFinite(raw) ? raw : null, source: 'Windows WMI',
-      component: /^\/(?:amdcpu|intelcpu|cpu)\//i.test(data['Identifier']) ? 'cpu' : 'other',
-    }];
+    return new WindowsSensorMapper().map(data, 'Windows WMI');
   }
 }
