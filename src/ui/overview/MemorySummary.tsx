@@ -16,7 +16,7 @@ export class MemorySummary extends PureComponent<ScreenProps> {
     const ram = reading.value;
     return <Panel title="MEMORY" accent={palette.memory} hint={reading.status} height={9} ascii={ascii}>
       {ram === null ? <ReadingNotice reading={reading} /> : <>
-        <Text color={palette.muted}>Active / installed</Text>
+        <Text color={palette.muted}>Used / installed</Text>
         <Text bold color={palette.text}>{F.bytes(ram.active)} <Text color={palette.faint}>/ {F.bytes(ram.total)}</Text></Text>
         <Gauge value={ratio(ram.active, ram.total)} width={width - 4} colour={palette.memory} ascii={ascii} />
         <Sparkline points={history.get('memory.usage')} width={width - 4} colour={palette.memory} ascii={ascii} />
