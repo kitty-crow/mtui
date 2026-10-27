@@ -1,0 +1,36 @@
+{
+  "name": "@kitty-crow/mtui",
+  "version": "0.1.0",
+  "description": "A polished terminal observatory for graphics, processor, memory and hardware sensors.",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "bun": ">=1.4.4"
+  },
+  "packageManager": "bun@1.4.4",
+  "scripts": {
+    "start": "bun src/main.ts",
+    "dev": "bun --watch src/main.ts",
+    "demo": "bun src/main.ts --demo",
+    "typecheck": "tsc --noEmit",
+    "guard": "bun scripts/guard.mts",
+    "test": "bun test",
+    "validate": "bun run typecheck && bun run guard && bun test",
+    "build": "bun run validate && bun scripts/build.mts",
+    "compile": "bun run build",
+    "serve": "bun src/main.ts --serve",
+    "preview": "bun scripts/preview.mts"
+  },
+  "dependencies": {
+    "ink": "8.0.0",
+    "react": "19.3.1",
+    "systeminformation": "5.33.16",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/bun": "1.4.4",
+    "@types/react": "19.3.0",
+    "ink-testing-library": "4.0.0",
+    "typescript": "5.9.3"
+  }
+}

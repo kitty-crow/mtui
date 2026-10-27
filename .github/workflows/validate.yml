@@ -1,0 +1,31 @@
+name: Validate and build
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    name: Validate (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - name: Smoke test executable
+        shell: bash
+        run: |
+          binary=./dist/mtui
+          if [ "$RUNNER_OS" = "Windows" ]; then binary=./dist/mtui.exe; fi
+          "$binary" --demo --json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mtui-${{ runner.os }}-${{ runner.arch }}
+          path: dist/mtui*
+          if-no-files-found: error
