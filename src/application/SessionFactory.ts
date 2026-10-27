@@ -31,7 +31,7 @@ export class SessionFactory {
   private registerLocal(registry: CollectorRegistry, adapters: PlatformFactory): void {
     registry.register('cpu', new CpuCollector(systemApi));
     registry.register('memory', new MemoryCollector(systemApi));
-    registry.register('graphics', new GraphicsCollector(systemApi, adapters.graphics()));
+    registry.register('graphics', new GraphicsCollector(systemApi, adapters.graphics(), adapters.nvidia()));
     registry.register('sensors', new SensorCollector(adapters.sensors()));
   }
 

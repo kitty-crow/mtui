@@ -4,6 +4,7 @@ import { NativeCommandRunner } from '../collectors/native/CommandRunner.ts';
 import { LinuxGraphics } from '../collectors/native/LinuxGraphics.ts';
 import { LinuxSensors } from '../collectors/native/LinuxSensors.ts';
 import { WindowsSensors } from '../collectors/native/WindowsSensors.ts';
+import { NvidiaTelemetry } from '../collectors/native/NvidiaTelemetry.ts';
 import { EmptySensorSource, type SensorSource } from '../collectors/native/SensorSource.ts';
 
 /** Platform branching is confined to composition, away from screens and models. */
@@ -20,4 +21,6 @@ export class PlatformFactory {
   public graphics(): LinuxGraphics | null {
     return this.hostPlatform === 'linux' ? new LinuxGraphics(this.files) : null;
   }
+
+  public nvidia(): NvidiaTelemetry { return new NvidiaTelemetry(new NativeCommandRunner()); }
 }

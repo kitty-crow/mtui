@@ -4,6 +4,7 @@ import { GraphicsMapper } from '../src/collectors/system/GraphicsMapper.ts';
 import { MemoryMapper } from '../src/collectors/system/MemoryMapper.ts';
 import { CpuMapper } from '../src/collectors/system/CpuMapper.ts';
 import { percentage, temperature } from '../src/collectors/shared/normalise.ts';
+import { NvidiaTelemetry } from '../src/collectors/native/NvidiaTelemetry.ts';
 
 const graphics: Systeminformation.GraphicsControllerData = { vendor: 'Example', model: 'GPU', bus: 'PCIe', vram: 8192, vramDynamic: false };
 const memory: Systeminformation.MemData = { total: 16384, active: 4096, available: 12288, free: 2048, used: 14336, buffcache: 10240, buffers: 0, cached: 10240, slab: 0, reclaimable: 0, swaptotal: 8192, swapused: 0, swapfree: 8192, writeback: 0, dirty: 0 };
@@ -44,5 +45,11 @@ describe('hardware normalisation', () => {
     expect(data.coreTemperatures).toEqual([45]);
     expect(data.cores[0]?.usage).toBe(0);
     expect(data.cores[0]?.speed).toBeNull();
+  });
+  test('fills NVIDIA fields from nvidia-smi when generic enumeration omits them', async () => {
+    const runner = { run: async () => '0, NVIDIA GeForce RTX 2080 Ti, 37, 11264, 2048, 52, 28, 121.5, 250, 1650, 7000, 00000000:01:00.0' };
+    const gpu = new GraphicsMapper().map({ ...graphics, vendor: 'NVIDIA', model: 'NVIDIA GeForce RTX 2080 Ti', pciBus: '0000:01:00.0' }, 0);
+    const result = await new NvidiaTelemetry(runner).enrich([{ ...gpu, usage: null, temperature: null, memoryUsed: null, memoryTotal: null }]);
+    expect(result[0]).toMatchObject({ usage: 37, temperature: 52, fanPercent: 28, memoryUsed: 2048 * 1024 ** 2, memoryTotal: 11264 * 1024 ** 2, power: 121.5 });
   });
 });

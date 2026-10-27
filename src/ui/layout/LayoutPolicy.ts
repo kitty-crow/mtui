@@ -4,7 +4,7 @@ export class LayoutPolicy {
   public readonly bodyHeight: number;
   public readonly supported: boolean;
   constructor(public readonly width: number, public readonly height: number) {
-    this.headerHeight = height >= 32 ? 5 : 1;
+    this.headerHeight = height >= 24 ? 5 : 1;
     this.bodyHeight = height - this.headerHeight - 4;
     this.supported = width >= 70 && height >= 24;
   }
