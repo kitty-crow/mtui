@@ -2,7 +2,8 @@ import { createHash } from 'node:crypto';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { mkdir, readFile, writeFile, access } from 'node:fs/promises';
-import { PowerShell, powershellLiteral } from './PowerShell.ts';
+import { PowerShell } from './PowerShell.ts';
+import { archiveScript } from './ArchiveScript.ts';
 
 export interface SensorDownload { readonly url: string; readonly sha256: string }
 type AssetFetch = (url: string, init: RequestInit) => Promise<Response>;
@@ -46,7 +47,7 @@ export class SensorAssets {
     if (ready && exists) return this.root;
     const archive = join(this.root, 'LibreHardwareMonitor-0.9.6.zip');
     await this.verifiedDownload(sensorLibrary, archive);
-    await this.shell.run(`Expand-Archive -LiteralPath ${powershellLiteral(archive)} -DestinationPath ${powershellLiteral(this.root)} -Force`, 'Extracting LibreHardwareMonitor');
+    await this.shell.run(archiveScript(archive, this.root), 'Extracting LibreHardwareMonitor');
     await access(library);
     await writeFile(join(this.root, '.ready'), sensorLibrary.sha256, 'utf8');
     return this.root;

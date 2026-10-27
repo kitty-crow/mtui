@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, mkdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
@@ -8,9 +8,32 @@ import { hardwareScript } from '../src/collectors/windows/HardwareScript.ts';
 import { LineWorker } from '../src/collectors/windows/LineWorker.ts';
 import { PowerShell, powershellArguments, powershellLiteral } from '../src/collectors/windows/PowerShell.ts';
 import { WindowsSensorMapper } from '../src/collectors/windows/WindowsSensorMapper.ts';
+import { archiveScript } from '../src/collectors/windows/ArchiveScript.ts';
 
 const executable = process.platform === 'win32' ? 'powershell.exe' : process.env['MTUI_TEST_POWERSHELL'];
 const hostTest = executable === undefined ? test.skip : test;
+
+hostTest('sensor archive extraction works with module auto-loading disabled and overwrites partial files', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'mtui-archive-'));
+  const source = join(root, 'source');
+  const destination = join(root, "Kitty's sensor files");
+  const archive = join(root, 'library.zip');
+  const shell = new PowerShell(executable ?? 'powershell.exe');
+  try {
+    await mkdir(join(source, 'nested'), { recursive: true });
+    await writeFile(join(source, 'library.dll'), 'library data');
+    await writeFile(join(source, 'nested', 'dependency.dll'), 'dependency data');
+    await shell.run(`[void][Reflection.Assembly]::LoadWithPartialName('System.IO.Compression.FileSystem');[IO.Compression.ZipFile]::CreateFromDirectory(${powershellLiteral(source)},${powershellLiteral(archive)})`);
+    await mkdir(destination);
+    await writeFile(join(destination, 'library.dll'), 'partial');
+    await shell.run(`$PSModuleAutoLoadingPreference='None';${archiveScript(archive, destination)}`, 'Extracting LibreHardwareMonitor');
+    expect(await readFile(join(destination, 'library.dll'), 'utf8')).toBe('library data');
+    expect(await readFile(join(destination, 'nested', 'dependency.dll'), 'utf8')).toBe('dependency data');
+    // Inject an escaping entry to verify that extraction cannot write outside its destination.
+    await shell.run(`[void][Reflection.Assembly]::LoadWithPartialName('System.IO.Compression.FileSystem');$zip=[IO.Compression.ZipFile]::Open(${powershellLiteral(archive)},[IO.Compression.ZipArchiveMode]::Update);try{[void]$zip.CreateEntry('../outside.dll')}finally{$zip.Dispose()}`);
+    await expect(shell.run(archiveScript(archive, destination), 'Extracting LibreHardwareMonitor')).rejects.toThrow('invalid destination path');
+  } finally { await rm(root, { recursive: true, force: true }); }
+}, 20_000);
 
 hostTest('setup retains PowerShell exceptions and identifies the failed operation over pipes', async () => {
   const shell = new PowerShell(executable ?? 'powershell.exe');
