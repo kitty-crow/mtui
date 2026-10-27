@@ -7,7 +7,7 @@ import { NativeWindowsSensors } from '../src/collectors/windows/NativeWindowsSen
 import { WindowsSensorBackend } from '../src/collectors/windows/WindowsSensorBackend.ts';
 import { LineWorker } from '../src/collectors/windows/LineWorker.ts';
 import { SensorAssets } from '../src/collectors/windows/SensorAssets.ts';
-import { powershellArguments, powershellLiteral } from '../src/collectors/windows/PowerShell.ts';
+import { powershellArguments, powershellLiteral, powershellFailure } from '../src/collectors/windows/PowerShell.ts';
 import { OptionParser } from '../src/cli/Options.ts';
 
 const packet = { sensors: [
@@ -105,6 +105,12 @@ describe('headless worker transport', () => {
 });
 
 describe('sensor dependency preparation', () => {
+  test('preserves the failing step and native diagnostic without exposing the full command', () => {
+    expect(powershellFailure({ stderr: 'Access to library.dll is denied', message: 'Command failed: powershell.exe encoded-script' }, 'Extracting LibreHardwareMonitor').message).toBe('Extracting LibreHardwareMonitor: Access to library.dll is denied');
+    expect(powershellFailure({ killed: true }, 'Installing PawnIO').message).toContain('timed out');
+    expect(powershellFailure({ code: 'ENOENT' }, 'Setup').message).toContain('could not be found');
+    expect(powershellFailure({ code: 5 }, 'Setup').message).toContain('code 5');
+  });
   test('rejects a corrupted download before writing or executing it', async () => {
     const root = await mkdtemp(join(tmpdir(), 'mtui-sensor-integrity-'));
     let commands = 0;

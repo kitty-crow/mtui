@@ -20,7 +20,7 @@ export class SensorAssets {
   public readonly root: string;
   private pending: Promise<string> | null = null;
 
-  constructor(private readonly shell = new PowerShell(), private readonly download: AssetFetch = fetch, root?: string) {
+  constructor(private readonly shell: Pick<PowerShell, 'run'> = new PowerShell(), private readonly download: AssetFetch = fetch, root?: string) {
     this.root = root ?? join(process.env['LOCALAPPDATA'] ?? homedir(), 'mTUI', 'sensors', 'lhm-0.9.6');
   }
 
@@ -46,7 +46,7 @@ export class SensorAssets {
     if (ready && exists) return this.root;
     const archive = join(this.root, 'LibreHardwareMonitor-0.9.6.zip');
     await this.verifiedDownload(sensorLibrary, archive);
-    await this.shell.run(`$ErrorActionPreference='Stop'; Expand-Archive -LiteralPath ${powershellLiteral(archive)} -DestinationPath ${powershellLiteral(this.root)} -Force`);
+    await this.shell.run(`Expand-Archive -LiteralPath ${powershellLiteral(archive)} -DestinationPath ${powershellLiteral(this.root)} -Force`, 'Extracting LibreHardwareMonitor');
     await access(library);
     await writeFile(join(this.root, '.ready'), sensorLibrary.sha256, 'utf8');
     return this.root;

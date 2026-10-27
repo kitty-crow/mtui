@@ -6,11 +6,17 @@ import { promisify } from 'node:util';
 import { execFile } from 'node:child_process';
 import { hardwareScript } from '../src/collectors/windows/HardwareScript.ts';
 import { LineWorker } from '../src/collectors/windows/LineWorker.ts';
-import { powershellArguments, powershellLiteral } from '../src/collectors/windows/PowerShell.ts';
+import { PowerShell, powershellArguments, powershellLiteral } from '../src/collectors/windows/PowerShell.ts';
 import { WindowsSensorMapper } from '../src/collectors/windows/WindowsSensorMapper.ts';
 
 const executable = process.platform === 'win32' ? 'powershell.exe' : process.env['MTUI_TEST_POWERSHELL'];
 const hostTest = executable === undefined ? test.skip : test;
+
+hostTest('setup retains PowerShell exceptions and identifies the failed operation over pipes', async () => {
+  const shell = new PowerShell(executable ?? 'powershell.exe');
+  expect(await shell.run("[Console]::Out.Write('True')", 'Checking permissions')).toBe('True');
+  await expect(shell.run("throw 'Archive destination is locked'", 'Extracting LibreHardwareMonitor')).rejects.toThrow('Extracting LibreHardwareMonitor: Archive destination is locked');
+});
 
 hostTest('PowerShell parses the production sensor host', async () => {
   const parser = `$tokens=$null;$errors=$null;[void][System.Management.Automation.Language.Parser]::ParseInput(${powershellLiteral(hardwareScript)},[ref]$tokens,[ref]$errors);if($errors.Count){throw ($errors | Out-String)}`;
