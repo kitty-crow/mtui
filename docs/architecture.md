@@ -32,7 +32,7 @@ mTUI separates acquisition, monitoring, transport and presentation. Terminal ren
 
 The terminal subscribes once through `useMonitor`. Pure React class components render snapshots and navigation state. Small hook components handle terminal input, window size and the activity marker. Ink owns terminal layout, raw input and alternate-screen restoration.
 
-The API reads the current snapshot and history directly. Multiple HTTP requests do not multiply hardware queries. Headless mode starts the same engine and listener without importing the terminal interface.
+The API reads the current snapshot and history directly. Multiple HTTP requests do not multiply hardware queries. Headless mode starts the same engine and listener without mounting the terminal interface.
 
 ## Availability and time
 
@@ -88,4 +88,4 @@ A failed connection preserves the host's last values and marks them stale. A pau
 
 ## Building
 
-`bun run validate` checks maintained source and runs the test suite. `bun run build` validates, compiles a native executable and checks its version command. Build helpers live in `.mts` files. The manual GitHub workflow builds on Ubuntu, Windows and macOS and uploads the resulting executables.
+`bun run validate` checks maintained source and runs the test suite. `bun run build` validates, compiles a native executable and exercises its version, JSON snapshot and printable terminal modes. Build helpers live in `.mts` files. The manual GitHub workflow builds on Ubuntu, Windows and macOS and uploads the resulting executables. `bun run preview` regenerates documentation images from simulated frames rendered by the same interface components.

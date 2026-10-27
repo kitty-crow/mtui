@@ -28,7 +28,7 @@ export class MemoryScreen extends PureComponent<ScreenProps> {
         </>}
       </Panel>
       <Panel title="INSTALLED MODULES" accent={palette.memory} hint={`${ram?.modules.length ?? 0} reported`} height={height - 9} ascii={ascii}>
-        {(ram?.modules.length ?? 0) > 0 ? <DataTable rows={ram?.modules ?? []} columns={this.columns.build(width - 4)} rowKey={(module, index) => `${module.bank}:${index}`} offset={offset} limit={Math.max(1, height - 14)} /> : <Text color={palette.muted}>Module inventory is not available from this host.</Text>}
+        {(ram?.modules.length ?? 0) > 0 ? <DataTable rows={ram?.modules ?? []} columns={this.columns.build(width - 4)} rowKey={(module, index) => `${module.bank}:${index}`} offset={offset} limit={Math.max(1, height - 15)} /> : <Text color={palette.muted}>Module inventory is not available from this host.</Text>}
         <Box flexGrow={1} />
         <Text color={palette.faint}>Reported DIMM temperatures appear in Sensors when available.</Text>
       </Panel>

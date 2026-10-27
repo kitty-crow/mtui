@@ -23,7 +23,7 @@ export class ProcessorScreen extends PureComponent<ScreenProps> {
         </>}
       </Panel>
       <Panel title="LOGICAL PROCESSORS" accent={palette.cpu} hint="↑ ↓ / PgUp PgDn" height={height - 6} ascii={ascii}>
-        <DataTable rows={cpu?.cores ?? []} columns={this.columns.build(width - 4, ascii)} rowKey={core => String(core.id)} offset={offset} limit={Math.max(1, height - 11)} />
+        <DataTable rows={cpu?.cores ?? []} columns={this.columns.build(width - 4, ascii)} rowKey={core => String(core.id)} offset={offset} limit={Math.max(1, height - 12)} />
         <Box flexGrow={1} />
         <Text color={palette.faint}>Temperature sensors are listed separately in Sensors.</Text>
       </Panel>

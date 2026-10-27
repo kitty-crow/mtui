@@ -22,6 +22,11 @@ describe('hardware normalisation', () => {
     expect(data.memoryUsage).toBe(25);
     expect(data.id).toBe('0000:02:00.0');
   });
+  test('treats a zero capacity as unavailable and falls back to valid inventory', () => {
+    const mapper = new GraphicsMapper();
+    expect(mapper.map({ ...graphics, memoryTotal: 0 }, 0).memoryTotal).toBe(8192 * 1024 ** 2);
+    expect(mapper.map({ ...graphics, vram: 0 }, 0).memoryTotal).toBeNull();
+  });
   test('preserves the active/cache distinction and skips empty DIMM slots', () => {
     const module: Systeminformation.MemLayoutData = { size: 0, bank: 'A1', type: 'DDR5', clockSpeed: 5600, formFactor: 'DIMM', partNum: '', serialNum: '', voltageConfigured: null, voltageMin: null, voltageMax: null };
     const data = new MemoryMapper().map(memory, [module]);

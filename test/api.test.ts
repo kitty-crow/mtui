@@ -70,6 +70,18 @@ describe('JSON resources', () => {
     expect((await body(router.handle(request('/schema'))))['properties']).toBeDefined();
     expect(emptySnapshot().sequence).toBe(0);
   });
+  test('uses the individual sensor freshness on a scalar sensor route', async () => {
+    const { router, registry, monitor, scenario } = await demoMonitor();
+    let fail = false;
+    registry.register('sensors', { name: 'test sensors', collect: async () => { if (fail) throw new Error('sensors offline'); return scenario.sensors(); } });
+    await monitor.refresh();
+    const updatedAt = monitor.getSnapshot().readings.sensors.updatedAt;
+    fail = true;
+    await monitor.refresh();
+    const data = await body(router.handle(request('/sensors/0/value')));
+    expect(data).toMatchObject({ status: 'stale', updatedAt, message: 'sensors offline' });
+    expect(monitor.getSnapshot().readings.cpu.status).toBe('live');
+  });
 });
 
 describe('HTTP boundary', () => {
@@ -83,6 +95,7 @@ describe('HTTP boundary', () => {
     const { catalogue } = await demoMonitor();
     const router = new ApiRouter(catalogue, 'token');
     expect(router.handle(request('/snapshot')).status).toBe(401);
+    expect(await router.handle(request('/snapshot', { method: 'HEAD' })).text()).toBe('');
     expect(router.handle(request('/snapshot', { headers: { Authorization: 'Bearer wrong' } })).status).toBe(401);
     expect(router.handle(request('/snapshot', { headers: { Authorization: 'Bearer token' } })).status).toBe(200);
   });

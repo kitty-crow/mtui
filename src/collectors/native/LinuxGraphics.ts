@@ -1,6 +1,6 @@
 import { basename } from 'node:path';
 import type { GpuMetrics } from '../../domain/graphics.ts';
-import { percentage, positive, ratio } from '../shared/normalise.ts';
+import { nonNegative, percentage, positive, ratio } from '../shared/normalise.ts';
 import { numericText, type FileAccess } from './FileAccess.ts';
 
 interface DrmSample {
@@ -26,7 +26,7 @@ export class LinuxGraphics {
       this.files.resolve(device), this.files.text(`${device}/gpu_busy_percent`),
       this.files.text(`${device}/mem_info_vram_total`), this.files.text(`${device}/mem_info_vram_used`),
     ]);
-    return { bus: basename(path ?? ''), usage: percentage(numericText(usage)), total: positive(numericText(total)), used: numericText(used) };
+    return { bus: basename(path ?? ''), usage: percentage(numericText(usage)), total: positive(numericText(total)), used: nonNegative(numericText(used)) };
   }
 
   private merge(gpu: GpuMetrics, samples: readonly DrmSample[]): GpuMetrics {

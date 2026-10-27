@@ -5,7 +5,7 @@ import { mebibytes, nonNegative, percentage, positive, ratio, temperature } from
 /** Normalises vendor telemetry. Memory-engine utilisation differs from occupancy. */
 export class GraphicsMapper {
   public map(data: Systeminformation.GraphicsControllerData, index: number): GpuMetrics {
-    const memoryTotal = mebibytes(data.memoryTotal ?? data.vram);
+    const memoryTotal = mebibytes(positive(data.memoryTotal) ?? positive(data.vram));
     const memoryUsed = mebibytes(data.memoryUsed);
     return {
       id: data.pciBus || data.busAddress || `${data.vendor}:${data.model}:${index}`,

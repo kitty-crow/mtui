@@ -16,6 +16,7 @@ describe('terminal layout', () => {
         expect(Math.max(...lines.map(line => Bun.stringWidth(line))), `${view} at ${width}×${height}`).toBeLessThanOrEqual(width);
         expect(output).toContain('Q quit');
         expect(output).toContain('DEMO');
+        if (view === 'processor') expect(output).toContain('Temperature sensors are listed separately');
       }
     }
   });
