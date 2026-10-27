@@ -37,6 +37,7 @@ export class LinuxSensors implements SensorSource {
     return {
       id: `${path}/${file}`, label: label || stem, device,
       value: raw === null ? null : raw / kind.scale, unit: kind.unit, source: 'Linux hwmon',
+      component: /^(?:coretemp|k10temp|zenpower|cpu_thermal)$/i.test(device.trim()) ? 'cpu' : 'other',
     };
   }
 }

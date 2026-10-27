@@ -25,6 +25,11 @@ export class SensorCatalogue {
       reported.push({ id: `gpu:${gpu.id}:fan`, label: 'GPU fan duty', device: gpu.model, value: gpu.fanPercent, unit: '%', source: 'Graphics collector', status: graphics.status, updatedAt: graphics.updatedAt, message: graphics.message });
       reported.push({ id: `gpu:${gpu.id}:memory-temp`, label: 'GPU memory temperature', device: gpu.model, value: gpu.memoryTemperature, unit: '°C', source: 'Graphics collector', status: graphics.status, updatedAt: graphics.updatedAt, message: graphics.message });
     }
-    return reported;
+    return reported.map(sensor => this.withAvailability(sensor));
+  }
+
+  private withAvailability(sensor: ReportedSensor): ReportedSensor {
+    if (sensor.value !== null || sensor.status === 'waiting') return sensor;
+    return { ...sensor, status: 'unavailable', updatedAt: null, message: sensor.message ?? 'No reading exposed by the active sensor providers' };
   }
 }

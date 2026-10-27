@@ -8,4 +8,5 @@ export interface SensorMetric {
   readonly value: number | null;
   readonly unit: SensorUnit;
   readonly source: string;
+  readonly component?: 'cpu' | 'gpu' | 'other' | undefined;
 }

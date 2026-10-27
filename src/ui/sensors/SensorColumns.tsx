@@ -7,9 +7,9 @@ export class SensorColumns {
     const source = width >= 100;
     const columns: Column<ReportedSensor>[] = [
       { title: 'SENSOR', width: 23, render: sensor => F.label(sensor.label) },
-      { title: 'DEVICE', width: width - 47 - (source ? 20 : 0), render: sensor => F.label(sensor.device) },
+      { title: 'DEVICE', width: width - 48 - (source ? 20 : 0), render: sensor => F.label(sensor.device) },
       { title: 'READING', width: 14, render: sensor => F.value(sensor.value, sensor.unit, sensor.unit === 'V' ? 2 : 0) },
-      { title: 'STATUS', width: 10, render: sensor => sensor.status },
+      { title: 'STATUS', width: 11, render: sensor => sensor.status },
     ];
     if (source) columns.push({ title: 'SOURCE', width: 20, render: sensor => sensor.source });
     return columns;

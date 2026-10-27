@@ -102,6 +102,10 @@ When stdin or stdout is redirected, mTUI prints one overview and exits. `--serve
 
 CPU load, per-thread usage and memory statistics use the operating system's counters. Graphics and temperature coverage varies with drivers, firmware and permissions. NVIDIA driver telemetry is discovered through `nvidia-smi` when available; Linux DRM counters supplement graphics readings. Linux hwmon and optional Windows LibreHardwareMonitor/OpenHardwareMonitor WMI providers supply extra sensors.
 
+Available CPU sensor channels feed the processor overview and JSON metrics as well as the Sensors screen. NVIDIA memory temperatures are queried independently of load and fan counters, so an unsupported thermal channel does not interrupt other GPU readings. Missing measurements are `null` in JSON and appear as `N/A` with an unavailable status in the sensor table.
+
+Platform adapters discover existing providers automatically. On Windows, CPU and motherboard temperatures require an active compatible hardware-monitor WMI provider; mTUI reports when none is accessible. Hardware access may require additional permissions on any operating system. A sensor that the hardware or driver does not expose remains unavailable.
+
 The [platform guide](docs/platforms.md) describes available readings and common gaps. Temperature colours are visual guides at 75°C and 90°C, rather than device-specific thermal limits.
 
 ## Build and development

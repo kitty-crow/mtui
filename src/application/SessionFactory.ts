@@ -4,6 +4,7 @@ import { CpuCollector } from '../collectors/system/CpuCollector.ts';
 import { MemoryCollector } from '../collectors/system/MemoryCollector.ts';
 import { GraphicsCollector } from '../collectors/system/GraphicsCollector.ts';
 import { SensorCollector } from '../collectors/system/SensorCollector.ts';
+import { SharedSensorSource } from '../collectors/native/SharedSensorSource.ts';
 import { systemApi } from '../collectors/system/SystemApi.ts';
 import { DemoScenario } from '../collectors/demo/DemoScenario.ts';
 import { CollectorRegistry } from '../monitoring/CollectorRegistry.ts';
@@ -29,10 +30,11 @@ export class SessionFactory {
   }
 
   private registerLocal(registry: CollectorRegistry, adapters: PlatformFactory): void {
-    registry.register('cpu', new CpuCollector(systemApi));
+    const sensors = new SharedSensorSource(adapters.sensors());
+    registry.register('cpu', new CpuCollector(systemApi, sensors));
     registry.register('memory', new MemoryCollector(systemApi));
     registry.register('graphics', new GraphicsCollector(systemApi, adapters.graphics(), adapters.nvidia()));
-    registry.register('sensors', new SensorCollector(adapters.sensors()));
+    registry.register('sensors', new SensorCollector(sensors));
   }
 
   private async remote(options: Options): Promise<MonitorSession> {

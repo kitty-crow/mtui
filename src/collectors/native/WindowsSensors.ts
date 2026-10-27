@@ -8,11 +8,12 @@ $ErrorActionPreference = 'Stop'
 foreach ($namespace in @('root/LibreHardwareMonitor', 'root/OpenHardwareMonitor')) {
   try {
     $values = @(Get-CimInstance -Namespace $namespace -ClassName Sensor | Select-Object Identifier, Name, Parent, SensorType, Value)
+    if ($values.Count -eq 0) { continue }
     [Console]::Out.Write((ConvertTo-Json -InputObject $values -Compress -Depth 3))
     exit 0
   } catch { continue }
 }
-[Console]::Error.Write('No accessible LibreHardwareMonitor or OpenHardwareMonitor WMI provider')
+[Console]::Error.Write('CPU/board sensors: no active LibreHardwareMonitor or OpenHardwareMonitor WMI provider')
 exit 1
 `;
 
@@ -37,6 +38,7 @@ export class WindowsSensors implements SensorSource {
       id: data['Identifier'], label: typeof data['Name'] === 'string' ? data['Name'] : data['Identifier'],
       device: typeof data['Parent'] === 'string' ? data['Parent'] : 'Hardware', unit,
       value: typeof raw === 'number' && Number.isFinite(raw) ? raw : null, source: 'Windows WMI',
+      component: /^\/(?:amdcpu|intelcpu|cpu)\//i.test(data['Identifier']) ? 'cpu' : 'other',
     }];
   }
 }

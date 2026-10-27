@@ -2,6 +2,7 @@ import { platform } from 'node:os';
 import type { GpuMetrics } from '../../domain/graphics.ts';
 import { mebibytes, nonNegative, percentage, positive, ratio, temperature } from '../shared/normalise.ts';
 import type { CommandRunner } from './CommandRunner.ts';
+import { NvidiaTemperatures } from './NvidiaTemperatures.ts';
 
 interface NvidiaSample {
   readonly index: number;
@@ -23,8 +24,15 @@ export class NvidiaTelemetry {
   constructor(private readonly runner: CommandRunner) {}
 
   public async enrich(gpus: readonly GpuMetrics[]): Promise<readonly GpuMetrics[]> {
-    const samples = await this.read();
-    return gpus.map((gpu, index) => this.merge(gpu, samples.find(sample => this.matches(sample, gpu, index))));
+    if (!gpus.some(gpu => gpu.vendor.toLowerCase().includes('nvidia'))) return gpus;
+    const executable = platform() === 'win32' ? 'nvidia-smi.exe' : 'nvidia-smi';
+    const [samples, thermals] = await Promise.all([this.read(), new NvidiaTemperatures(this.runner).read(executable)]);
+    return gpus.map((gpu, index) => {
+      const sample = samples.find(item => this.clean(item.bus) === this.clean(gpu.bus)) ?? samples.find(item => this.matches(item, gpu, index));
+      const enriched = this.merge(gpu, sample);
+      const thermal = thermals.find(item => this.clean(item.bus) === this.clean(sample?.bus ?? gpu.bus));
+      return { ...enriched, memoryTemperature: thermal?.memory ?? gpu.memoryTemperature };
+    });
   }
 
   private async read(): Promise<readonly NvidiaSample[]> {

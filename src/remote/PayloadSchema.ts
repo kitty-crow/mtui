@@ -15,7 +15,7 @@ const gpu = z.object({
   usage: metric, memoryUsage: metric, memoryTotal: metric, memoryUsed: metric, temperature: metric,
   memoryTemperature: metric, fanPercent: metric, power: metric, powerLimit: metric, coreClock: metric, memoryClock: metric,
 });
-const sensor = z.object({ id: z.string(), label: z.string(), device: z.string(), value: metric, unit: z.enum(['°C', 'RPM', 'V', 'W', '%']), source: z.string() });
+const sensor = z.object({ id: z.string(), label: z.string(), device: z.string(), value: metric, unit: z.enum(['°C', 'RPM', 'V', 'W', '%']), source: z.string(), component: z.enum(['cpu', 'gpu', 'other']).optional() });
 
 function reading<T extends z.ZodType>(value: T) {
   return z.object({ value: value.nullable(), status: z.enum(['waiting', 'live', 'stale', 'unavailable']), updatedAt: metric, message: z.string().nullable() });

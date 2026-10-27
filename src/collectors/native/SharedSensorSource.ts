@@ -1,0 +1,12 @@
+import type { SensorMetric } from '../../domain/sensors.ts';
+import { CachedQuery } from '../shared/CachedQuery.ts';
+import type { SensorSource } from './SensorSource.ts';
+
+/** Coalesces simultaneous CPU and sensor reads without caching old measurements. */
+export class SharedSensorSource implements SensorSource {
+  private readonly query: CachedQuery<readonly SensorMetric[]>;
+  constructor(source: SensorSource) {
+    this.query = new CachedQuery(() => source.read(), 0);
+  }
+  public read(): Promise<readonly SensorMetric[]> { return this.query.get(); }
+}
