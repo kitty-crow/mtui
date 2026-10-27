@@ -6,6 +6,10 @@ import { LinuxSensors } from '../collectors/native/LinuxSensors.ts';
 import { WindowsSensors } from '../collectors/native/WindowsSensors.ts';
 import { NativeWindowsSensors } from '../collectors/windows/NativeWindowsSensors.ts';
 import { WindowsSensorBackend } from '../collectors/windows/WindowsSensorBackend.ts';
+import { WindowsSensorSetup } from '../collectors/windows/WindowsSensorSetup.ts';
+import { NativeSensorSetup } from '../collectors/shared/NativeSensorSetup.ts';
+import { systemApi } from '../collectors/system/SystemApi.ts';
+import type { SensorSetupProvider } from '../collectors/contracts/SensorSetupProvider.ts';
 import { NvidiaTelemetry } from '../collectors/native/NvidiaTelemetry.ts';
 import { EmptySensorSource, type SensorSource } from '../collectors/native/SensorSource.ts';
 
@@ -25,4 +29,9 @@ export class PlatformFactory {
   }
 
   public nvidia(): NvidiaTelemetry { return new NvidiaTelemetry(new NativeCommandRunner()); }
+
+  public sensorSetup(): SensorSetupProvider {
+    if (this.hostPlatform === 'win32') return new WindowsSensorSetup();
+    return new NativeSensorSetup(this.sensors(), () => systemApi.cpuTemperature());
+  }
 }

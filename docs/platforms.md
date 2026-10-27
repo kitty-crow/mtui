@@ -17,6 +17,8 @@ mTUI runs on Linux, Windows and macOS through Bun. The terminal and JSON API use
 
 ## Linux
 
+`bun run build` runs the host's sensor setup automatically. `--setup-sensors` invokes the same operation independently when using downloaded executables or running from source without building. The native setup adapter checks accessible sensor channels and processor temperature support, and reports their availability.
+
 The native adapters read `/sys/class/hwmon` and `/sys/class/drm`. Temperature inputs in milli-Celsius, voltages in millivolts and power in microwatts are converted to display/API units. Fan inputs are reported in RPM. Unreadable inputs remain unavailable.
 
 Some distributions expose more processor temperatures after their usual `lm-sensors` package is installed. GPU enumeration can depend on PCI discovery utilities and an active graphics driver. `nvidia-smi` supplies NVIDIA measurements when installed with the vendor driver; available DRM files can supply GPU utilisation and VRAM counters for other adapters.
@@ -29,13 +31,23 @@ Processor, memory and graphics readings use the Windows facilities supported by 
 
 An existing **LibreHardwareMonitor** or **OpenHardwareMonitor** WMI provider is reused when available. Otherwise, mTUI loads LibreHardwareMonitorLib 0.9.6 in a hidden PowerShell worker. The worker opens the hardware once, updates CPU, motherboard, memory, GPU and controller sensors on demand, and closes its hardware handles when mTUI exits. This works over SSH and without a desktop session.
 
-Run `mtui.exe --setup-sensors` once from an administrator terminal to prepare the library and install PawnIO 2.2.0. Both downloads come from official, versioned releases and are checked against pinned SHA-256 digests before extraction or execution. A restart is needed only when the installer reports it. Subsequent local hardware reads require an administrator session; remote API clients do not. Monitoring itself never installs a driver or opens an elevation prompt.
+The shared build and `--setup-sensors` entry points select this host adapter automatically. Run them from an administrator terminal. This adapter prepares LibreHardwareMonitorLib 0.9.6 and installs PawnIO 2.2.0 when no PawnIO installation is present; an existing driver installation is retained. Downloads come from official, versioned releases and are checked against pinned SHA-256 digests before extraction or execution.
+
+If you downloaded an executable, ran `bun run build --skip-sensor-setup`, or run from source without building, setup is a separate one-time step:
+
+```powershell
+.\mtui.exe --setup-sensors
+```
+
+For a source checkout, use `bun run start --setup-sensors` instead, as on other platforms. A successful local build already performs this step. A restart is needed only when the installer reports it. Subsequent local hardware reads require an administrator session; remote API clients do not. Monitoring itself never installs a driver or opens an elevation prompt.
 
 The library and its dependencies are cached in `%LOCALAPPDATA%\mTUI\sensors\lhm-0.9.6`. First-use preparation requires internet access; polling is offline after preparation. When using different Windows accounts, prepare the library for each account. mTUI does not start the LibreHardwareMonitor GUI or publish a WMI namespace.
 
 If hardware access is unavailable, the sensor collector reports a short diagnostic while processor load, memory and graphics monitoring continue. A missing driver, insufficient privileges and an unsupported hardware channel are different conditions. Reported processor frequencies can be nominal or static, depending on the Windows API and driver.
 
 ## macOS
+
+The build invokes sensor setup automatically. `--setup-sensors` can also be run separately. The native setup adapter checks available readings and reports the host's current sensor coverage.
 
 Processor load, per-thread usage, memory and graphics inventory use the OS information available to systeminformation. Temperature and graphics telemetry depend on the model, operating system and available sensor support. Unsupported values appear as N/A. A dedicated additional-sensor adapter is not included.
 

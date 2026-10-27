@@ -11,6 +11,7 @@ mTUI separates acquisition, monitoring, transport and presentation. Terminal ren
 | `src/collectors/shared/` | Normalisation and cached inventory queries |
 | `src/collectors/system/` | Portable systeminformation adapters and data mappers |
 | `src/collectors/native/` | Read-only Linux sysfs and Windows WMI adapters |
+| `src/collectors/windows/` | Headless hardware reader, pinned sensor dependencies and PowerShell transport |
 | `src/collectors/demo/` | Generic simulated workstation scenario |
 | `src/monitoring/` | Provider isolation, snapshot acquisition, polling, history and sensor catalogue |
 | `src/api/config/` | Listener configuration from the environment |
@@ -88,4 +89,6 @@ A failed connection preserves the host's last values and marks them stale. A pau
 
 ## Building
 
-`bun run validate` checks maintained source and runs the test suite. `bun run build` validates, compiles a native executable and exercises its version, JSON snapshot and printable terminal modes. Build helpers live in `.mts` files. The manual GitHub workflow builds on Ubuntu, Windows and macOS and uploads the resulting executables. `bun run preview` regenerates documentation images from simulated frames rendered by the same interface components.
+`bun run validate` checks maintained source and runs the test suite. `bun run build` validates, runs host sensor setup, compiles a native executable and exercises its version, JSON snapshot and printable terminal modes. `SensorBuildSetup` invokes the same platform-neutral `SensorSetup` operation exposed by `--setup-sensors`. `PlatformFactory` supplies the appropriate `SensorSetupProvider`: native sensor checks or the Windows library/driver preparation adapter. Existing PawnIO installations are retained. `--skip-sensor-setup` produces an executable without running host preparation, as used by CI.
+
+Build helpers live in `.mts` files. The manual GitHub workflow builds on Ubuntu, Windows and macOS and uploads the resulting executables. Users of downloaded artifacts can run the executable with `--setup-sensors` on the monitored host. `bun run preview` regenerates documentation images from simulated frames rendered by the same interface components.

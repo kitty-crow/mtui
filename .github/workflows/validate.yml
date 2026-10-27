@@ -17,7 +17,7 @@ jobs:
         with:
           bun-version: 1.4.4
       - run: bun install --frozen-lockfile
-      - run: bun run build
+      - run: bun run build --skip-sensor-setup
       - name: Smoke test executable
         shell: bash
         run: |

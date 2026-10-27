@@ -10,7 +10,7 @@ Usage: bun run start [options]
   --json            Print one snapshot as JSON and exit
   --serve           Run only the LAN API, without a terminal interface
   --connect <url>   Monitor another mTUI host through its API
-  --setup-sensors   Install Windows hardware-sensor support (administrator)
+  --setup-sensors   Prepare or check this host's hardware-sensor support
   --no-api          Run a local terminal without starting the API
   --no-colour       Disable terminal colours
   --no-motion       Disable the activity animation

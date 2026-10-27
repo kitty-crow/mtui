@@ -38,6 +38,8 @@ bun run start
 
 Use `bun run demo` to explore the interface with simulated hardware. Demo mode is labelled in the terminal and JSON responses.
 
+`bun run build` also runs sensor setup for the current host. If you run from source without building, use `bun run start --setup-sensors` first. Downloaded executables provide the same `--setup-sensors` option. Setup selects the appropriate host adapter automatically; see the [platform guide](docs/platforms.md) for driver and permission details.
+
 ## Views
 
 | View | Contents |
@@ -106,7 +108,7 @@ Available CPU sensor channels feed the processor overview and JSON metrics as we
 
 Platform adapters discover available readings automatically. Windows uses an existing compatible WMI provider when present, or starts an integrated, headless LibreHardwareMonitor library reader. The library is downloaded from its official release on first use, verified against a pinned SHA-256 digest, and cached under `%LOCALAPPDATA%\mTUI\sensors`. No GUI application needs to run.
 
-For Windows CPU and motherboard sensors, run `mtui.exe --setup-sensors` once from an administrator terminal. This downloads and installs the pinned PawnIO hardware-access driver. Setup reports if Windows needs a restart. Run subsequent local monitoring sessions as administrator for privileged sensors; remote clients do not need elevation. Normal monitoring never installs drivers or requests elevation. An existing WMI provider can still supply readings without this setup.
+Sensor setup uses the host's platform adapter. Linux and macOS check their available native sensor providers. The Windows adapter prepares the pinned LibreHardwareMonitor library and installs PawnIO 2.2.0 when no PawnIO installation exists; existing driver installations are retained. That adapter requires an administrator terminal and reports when a restart is needed. Remote clients do not need hardware-access privileges. Normal monitoring never installs drivers or requests elevation.
 
 Hardware and firmware determine which sensors exist. Unsupported measurements remain unavailable.
 
@@ -119,6 +121,22 @@ bun run validate
 bun run build
 ```
 
-The build produces `dist/mtui` or `dist/mtui.exe`, including the Bun runtime. `bun run build` also runs validation. The **Validate and build** GitHub Actions workflow is started manually and builds on Linux, Windows and macOS.
+The build validates the source and tests, runs sensor setup for the current host, then compiles and verifies `dist/mtui` or `dist/mtui.exe`, including the Bun runtime. Sensor setup is part of the build on Linux, Windows and macOS. The selected adapter handles platform-specific prerequisites and permissions.
+
+To produce an executable without installing sensor support, such as on a CI runner:
+
+```sh
+bun run build --skip-sensor-setup
+```
+
+If you skipped setup, downloaded an executable, or run directly from source, the optional standalone step is:
+
+```sh
+bun run start --setup-sensors
+```
+
+With a compiled executable, use `./mtui --setup-sensors` or `.\mtui.exe --setup-sensors`. A successful local build already performs this step. Setup reports any privileges or restart required by the host adapter.
+
+The **Validate and build** GitHub Actions workflow is started manually and builds on Linux, Windows and macOS. It skips local driver installation when producing its executable artifacts.
 
 The source is organised around typed domain models, replaceable collectors, a monitoring engine, HTTP resources and terminal views. Start with the [architecture guide](docs/architecture.md) to add a collector or screen.
