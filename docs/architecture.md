@@ -11,7 +11,7 @@ mTUI separates acquisition, monitoring, transport and presentation. Terminal ren
 | `src/collectors/shared/` | Normalisation and cached inventory queries |
 | `src/collectors/system/` | Portable systeminformation adapters and data mappers |
 | `src/collectors/native/` | Read-only Linux sysfs and Windows WMI adapters |
-| `src/collectors/linux/` | Firmware DIMM discovery and memory record parsing |
+| `src/collectors/linux/` | Firmware DIMM discovery, Intel PMU sampling and telemetry parsing |
 | `src/collectors/windows/` | Headless hardware reader, pinned sensor dependencies and PowerShell transport |
 | `src/collectors/demo/` | Generic simulated workstation scenario |
 | `src/monitoring/` | Provider isolation, snapshot acquisition, polling, history and sensor catalogue |
@@ -77,6 +77,8 @@ Failed acquisitions append gaps. Removed adapters have their series pruned. New 
 Physical memory discovery implements `MemoryInventorySource`. `MemoryInventory` uses portable discovery and an optional host adapter, while `MemoryModuleMapper` rejects aggregate placeholders. `MemoryCollector` starts discovery in the background and reads its cached result without delaying allocation samples. Inventory diagnostics are published separately from allocation counters. `DmiMemoryParser` handles individual firmware records and configured DDR transfer rates without combining identical modules.
 
 A new platform sensor source implements `SensorSource`. `PlatformFactory` selects it at composition time. `SensorCatalogue` combines those channels with processor and GPU temperature/fan readings for the interface and API.
+
+`LinuxGraphics` matches DRM samples to graphics adapters by PCI address. `IntelGraphics` merges optional PMU readings from `IntelGpuSampler`, with JSON interpretation isolated in `IntelTelemetryParser`. `CapturedTimeoutRunner` retains the final stdout from a bounded GNU timeout window, including normal timeout exit status 124. Sampling selects a specific DRM card; the same adapter diagnostics travel through the shared snapshot and JSON API.
 
 ## Adding a screen
 

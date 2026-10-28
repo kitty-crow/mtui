@@ -11,6 +11,7 @@ mTUI runs on Linux, Windows and macOS through Bun. The terminal and JSON API use
 | Memory module inventory | When exposed | When exposed | When exposed |
 | Graphics inventory | Driver/OS discovery | Driver/OS discovery | OS discovery |
 | NVIDIA load, clocks, power and fan duty | Driver telemetry | Driver telemetry | Generally unavailable |
+| Intel graphics load, clocks and GPU power | i915/Xe sysfs and optional Intel PMU tools, where supported | Driver-dependent | Driver-dependent |
 | Other graphics load and VRAM | Driver telemetry; Linux DRM counters where exposed | Driver-dependent | Driver-dependent |
 | Processor temperature | Reported sensors | Reported sensors | Reported sensors, where supported |
 | Additional fan, temperature, voltage and power channels | Linux hwmon | Integrated headless library or existing WMI provider | No additional native adapter included |
@@ -24,6 +25,16 @@ The native adapters read `/sys/class/hwmon` and `/sys/class/drm`. Temperature in
 Some distributions expose more processor temperatures after their usual `lm-sensors` package is installed. GPU enumeration can depend on PCI discovery utilities and an active graphics driver. `nvidia-smi` supplies NVIDIA measurements when installed with the vendor driver; available DRM files can supply GPU utilisation and VRAM counters for other adapters.
 
 mTUI does not run sensor detection tools, write sysfs controls or change fan curves.
+
+### Intel graphics
+
+Integrated graphics appear alongside discrete adapters, including on headless hosts. Intel integrated models use shared system memory. A PCI memory aperture reported by enumeration is not treated as dedicated VRAM or as the amount of system RAM available to graphics.
+
+The Linux adapter matches DRM cards by PCI address, reads the bound driver, and checks accessible i915 frequency files. With `intel_gpu_top` from the distribution's Intel GPU tools package, it also collects short JSON samples of performance counters. On Ubuntu, install `intel-gpu-tools`; the bounded sampling helper uses `timeout` from `coreutils`. Authorise restricted counter reads with `sudo -v` in the same terminal before launching mTUI. Monitoring never prompts for a password or changes global kernel permission settings.
+
+Intel load is the busiest reported GPU engine's utilisation, rather than a sum that could exceed 100%. Clocks use actual frequency where exposed, and power uses GPU-domain watts only. CPU package power, CPU temperatures and system RAM capacity are not substituted for missing GPU measurements. The helper selects the matched DRM card explicitly and stops after a bounded sampling window, including with tool versions that have no sample-count flag.
+
+Missing counters remain N/A, with an availability message in adapter details and `/gpu/0/telemetryMessage`. The same readings are available through `/gpu/0/usage`, `/gpu/0/coreClock`, `/gpu/0/power` and `/gpu/0/sharedMemory`. Hardware without a separate GPU temperature channel, fan sensor or dedicated memory budget continues to report those fields as unavailable.
 
 ### Physical memory inventory
 

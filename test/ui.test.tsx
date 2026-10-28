@@ -24,7 +24,7 @@ describe('terminal layout', () => {
     const { monitor, identity } = await demoMonitor();
     const navigation = new NavigationController().getState();
     const output = renderToString(<Dashboard snapshot={monitor.getSnapshot()} history={monitor.history} identity={identity} navigation={navigation} width={110} height={32} offset={0} gpuIndex={0} interval={1000} paused={false} motion={false} ascii={true} remote={null} endpoint={null} />, { columns: 110 });
-    for (const label of ['LOAD', 'VRAM USED / TOTAL', 'TEMP', 'FAN %', 'POWER', 'Example Discrete GPU']) expect(output).toContain(label);
+    for (const label of ['LOAD', 'MEM USED / TOTAL', 'TEMP', 'FAN %', 'POWER', 'Example Discrete GPU']) expect(output).toContain(label);
     expect(output).toContain('+---');
     expect(output).not.toContain('╭');
   });

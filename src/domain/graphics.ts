@@ -17,4 +17,6 @@ export interface GpuMetrics {
   readonly powerLimit: number | null;
   readonly coreClock: number | null;
   readonly memoryClock: number | null;
+  /** Optional adapter diagnostic, also exposed through the JSON API. */
+  readonly telemetryMessage?: string | null | undefined;
 }

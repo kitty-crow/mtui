@@ -10,6 +10,9 @@ import { WindowsSensorSetup } from '../collectors/windows/WindowsSensorSetup.ts'
 import { NativeSensorSetup } from '../collectors/shared/NativeSensorSetup.ts';
 import { MemoryInventory } from '../collectors/system/MemoryInventory.ts';
 import { LinuxMemoryInventory } from '../collectors/linux/LinuxMemoryInventory.ts';
+import { IntelGraphics } from '../collectors/linux/IntelGraphics.ts';
+import { IntelGpuSampler } from '../collectors/linux/IntelGpuSampler.ts';
+import { CapturedTimeoutRunner } from '../collectors/linux/CapturedTimeoutRunner.ts';
 import { systemApi } from '../collectors/system/SystemApi.ts';
 import type { SensorSetupProvider } from '../collectors/contracts/SensorSetupProvider.ts';
 import { NvidiaTelemetry } from '../collectors/native/NvidiaTelemetry.ts';
@@ -27,7 +30,7 @@ export class PlatformFactory {
   }
 
   public graphics(): LinuxGraphics | null {
-    return this.hostPlatform === 'linux' ? new LinuxGraphics(this.files) : null;
+    return this.hostPlatform === 'linux' ? new LinuxGraphics(this.files, '/sys/class/drm', new IntelGraphics(new IntelGpuSampler(new CapturedTimeoutRunner()))) : null;
   }
 
   public nvidia(): NvidiaTelemetry { return new NvidiaTelemetry(new NativeCommandRunner()); }

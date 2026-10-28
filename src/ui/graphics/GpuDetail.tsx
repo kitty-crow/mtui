@@ -28,6 +28,7 @@ export class GpuDetail extends PureComponent<Props> {
             <Text color={palette.faint}>{gpu.sharedMemory ? 'Shared system memory' : 'Dedicated graphics memory'}</Text>
           </Box>
         </Box>
+        {height >= 16 && gpu.telemetryMessage && <Text color={palette.muted} wrap="truncate-end">{F.label(gpu.telemetryMessage)}</Text>}
         <Text color={palette.faint}>LOAD HISTORY · peak {F.percent(history.peak(`gpu.${gpu.id}.usage`))}</Text>
         <Sparkline points={history.get(`gpu.${gpu.id}.usage`)} width={width - 4} colour={palette.graphics} ascii={ascii} />
         {height >= 13 && <>

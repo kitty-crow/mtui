@@ -13,7 +13,7 @@ export class GpuColumns {
       { title: '#', width: 3, render: (_gpu, index) => String(index) },
       { title: 'GPU', width: modelWidth, render: gpu => F.label(gpu.model) },
       { title: 'LOAD', width: 9, render: gpu => F.percent(gpu.usage) },
-      { title: wide ? 'VRAM USED / TOTAL' : 'VRAM %', width: vramWidth, render: gpu => wide ? `${F.bytes(gpu.memoryUsed)} / ${F.bytes(gpu.memoryTotal)}` : F.percent(gpu.memoryUsage) },
+      { title: wide ? 'MEM USED / TOTAL' : 'MEM %', width: vramWidth, render: gpu => wide ? `${F.bytes(gpu.memoryUsed)} / ${F.bytes(gpu.memoryTotal)}` : F.percent(gpu.memoryUsage) },
       { title: 'TEMP', width: 8, render: gpu => F.temperature(gpu.temperature) },
       { title: 'FAN %', width: 8, render: gpu => F.percent(gpu.fanPercent) },
       { title: 'POWER', width: 10, render: gpu => F.value(gpu.power, 'W') },

@@ -13,7 +13,7 @@ const memory = z.object({ total: z.number().nonnegative(), active: z.number().no
 const gpu = z.object({
   id: z.string(), model: z.string(), vendor: z.string(), bus: z.string(), driver: z.string(), sharedMemory: z.boolean(),
   usage: metric, memoryUsage: metric, memoryTotal: metric, memoryUsed: metric, temperature: metric,
-  memoryTemperature: metric, fanPercent: metric, power: metric, powerLimit: metric, coreClock: metric, memoryClock: metric,
+  memoryTemperature: metric, fanPercent: metric, power: metric, powerLimit: metric, coreClock: metric, memoryClock: metric, telemetryMessage: z.string().nullable().optional(),
 });
 const sensor = z.object({ id: z.string(), label: z.string(), device: z.string(), value: metric, unit: z.enum(['°C', 'RPM', 'V', 'W', '%']), source: z.string(), component: z.enum(['cpu', 'gpu', 'other']).optional() });
 
