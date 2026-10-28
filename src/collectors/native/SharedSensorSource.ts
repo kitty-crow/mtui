@@ -9,5 +9,7 @@ export class SharedSensorSource implements SensorSource {
     this.query = new CachedQuery(() => source.read(), 0);
   }
   public read(): Promise<readonly SensorMetric[]> { return this.query.get(); }
+  /** The last completed sensor sample, without waiting for a slow hardware probe. */
+  public peek(): readonly SensorMetric[] | null { return this.query.peek(); }
   public close(): void { this.source.close?.(); }
 }
