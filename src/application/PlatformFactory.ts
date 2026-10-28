@@ -11,6 +11,7 @@ import { NativeSensorSetup } from '../collectors/shared/NativeSensorSetup.ts';
 import { MemoryInventory } from '../collectors/system/MemoryInventory.ts';
 import { LinuxMemoryInventory } from '../collectors/linux/LinuxMemoryInventory.ts';
 import { IntelGraphics } from '../collectors/linux/IntelGraphics.ts';
+import { LinuxSensorSetup } from '../collectors/linux/LinuxSensorSetup.ts';
 import { IntelGpuSampler } from '../collectors/linux/IntelGpuSampler.ts';
 import { CapturedTimeoutRunner } from '../collectors/linux/CapturedTimeoutRunner.ts';
 import { systemApi } from '../collectors/system/SystemApi.ts';
@@ -41,6 +42,7 @@ export class PlatformFactory {
 
   public sensorSetup(): SensorSetupProvider {
     if (this.hostPlatform === 'win32') return new WindowsSensorSetup();
-    return new NativeSensorSetup(this.sensors(), () => systemApi.cpuTemperature());
+    const native = new NativeSensorSetup(this.sensors(), () => systemApi.cpuTemperature());
+    return this.hostPlatform === 'linux' ? new LinuxSensorSetup(native, this.files) : native;
   }
 }

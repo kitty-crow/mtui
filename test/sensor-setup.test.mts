@@ -3,6 +3,7 @@ import { SensorBuildSetup } from '../scripts/build/SensorBuildSetup.mts';
 import { SensorSetup } from '../src/application/SensorSetup.ts';
 import { PlatformFactory } from '../src/application/PlatformFactory.ts';
 import { NativeSensorSetup } from '../src/collectors/shared/NativeSensorSetup.ts';
+import { LinuxSensorSetup } from '../src/collectors/linux/LinuxSensorSetup.ts';
 import { WindowsSensorSetup } from '../src/collectors/windows/WindowsSensorSetup.ts';
 
 describe('shared sensor setup', () => {
@@ -20,8 +21,11 @@ describe('shared sensor setup', () => {
     expect(calls).toBe(0);
     await expect(build.run(['--wrong'])).rejects.toThrow('Unknown build option');
   });
-  test.each(['linux', 'darwin'])('selects a native setup provider on %s', host => {
-    expect(new PlatformFactory(host).sensorSetup()).toBeInstanceOf(NativeSensorSetup);
+  test('selects Linux prerequisite preparation for Linux builds', () => {
+    expect(new PlatformFactory('linux').sensorSetup()).toBeInstanceOf(LinuxSensorSetup);
+  });
+  test('selects native sensor checks on macOS', () => {
+    expect(new PlatformFactory('darwin').sensorSetup()).toBeInstanceOf(NativeSensorSetup);
   });
   test('selects driver preparation only in the Windows adapter', () => {
     expect(new PlatformFactory('win32').sensorSetup()).toBeInstanceOf(WindowsSensorSetup);
