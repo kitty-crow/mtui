@@ -30,7 +30,7 @@ hostTest('sensor archive extraction works with module auto-loading disabled and 
     expect(await readFile(join(destination, 'library.dll'), 'utf8')).toBe('library data');
     expect(await readFile(join(destination, 'nested', 'dependency.dll'), 'utf8')).toBe('dependency data');
     // Inject an escaping entry to verify that extraction cannot write outside its destination.
-    await shell.run(`[void][Reflection.Assembly]::LoadWithPartialName('System.IO.Compression.FileSystem');$zip=[IO.Compression.ZipFile]::Open(${powershellLiteral(archive)},[IO.Compression.ZipArchiveMode]::Update);try{[void]$zip.CreateEntry('../outside.dll')}finally{$zip.Dispose()}`);
+    await shell.run(`Add-Type -AssemblyName 'System.IO.Compression';[void][Reflection.Assembly]::LoadWithPartialName('System.IO.Compression.FileSystem');$zip=[IO.Compression.ZipFile]::Open(${powershellLiteral(archive)},[IO.Compression.ZipArchiveMode]::Update);try{[void]$zip.CreateEntry('../outside.dll')}finally{$zip.Dispose()}`);
     await expect(shell.run(archiveScript(archive, destination), 'Extracting LibreHardwareMonitor')).rejects.toThrow('invalid destination path');
   } finally { await rm(root, { recursive: true, force: true }); }
 }, 20_000);
