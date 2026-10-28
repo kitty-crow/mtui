@@ -14,9 +14,29 @@ mTUI (monitor TUI) is a Bun application for monitoring graphics adapters, proces
 
 ![mTUI overview with simulated telemetry](assets/overview.svg)
 
-## Start monitoring
+## One-command installation
 
-Requires **Bun 1.4.4 or later** on Linux, Windows or macOS. The terminal interface fits **70 × 24** cells; **110 × 32** gives charts and sensor summaries more room.
+The installer handles a fresh machine or updates an existing checkout. It installs or upgrades Bun when needed, installs dependencies, repairs incomplete installations (including a fallback to npm when available), validates the build, prepares local sensors, deploys the standalone executable to your home directory and launches mTUI. Git is optional: without it, the installer downloads a source archive.
+
+**Windows (PowerShell):**
+
+```powershell
+irm https://raw.githubusercontent.com/kitty-crow/mtui/main/install.ps1 | iex
+```
+
+**Linux and macOS (Bash):**
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/kitty-crow/mtui/main/install.sh | bash
+```
+
+Windows installs to `$HOME\mTUI\mtui.exe`; Linux and macOS install to `~/mTUI/mtui`. Run these same commands again to update and redeploy. If Windows sensor drivers require administrator access or a restart, setup reports this; no automatic driver installation can bypass an OS permission prompt.
+
+To install without launching, invoke a checked-out installer as `./install.sh --no-launch` or `.\install.ps1 -NoLaunch`. The standalone executable needs neither Bun nor npm once built.
+
+## Start monitoring from source
+
+Requires **Bun 1.4.4 or later** on Linux, Windows or macOS when choosing to build manually. The terminal interface fits **70 × 24** cells; **110 × 32** gives charts and sensor summaries more room.
 
 ```sh
 git clone https://github.com/kitty-crow/mtui.git
