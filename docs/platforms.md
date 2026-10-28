@@ -25,6 +25,14 @@ Some distributions expose more processor temperatures after their usual `lm-sens
 
 mTUI does not run sensor detection tools, write sysfs controls or change fan curves.
 
+### Physical memory inventory
+
+DIMM count, capacity and configured speed come from firmware records, separately from live RAM usage. mTUI discards aggregate library fallbacks rather than presenting total RAM as a single module. On Linux it also queries `dmidecode --type 17`, including when the utility is outside the current PATH. Empty slots are excluded, and identical installed modules remain separate rows.
+
+Install your distribution's `dmidecode` package if needed. Firmware reads commonly require administrator access. Run `sudo -v` in the same terminal before starting mTUI to authorise a non-interactive, read-only query. mTUI never prompts for a password during monitoring. If the credentials expire, renew them and allow up to a minute for inventory discovery to refresh. Virtual machines and some firmware do not expose physical module details even with administrator access.
+
+DDR speeds are displayed in MT/s, using configured speed when available and rated speed otherwise. The JSON API includes `/ram/modules`, `/ram/modules/0/size`, `/ram/modules/0/transferRate` (MT/s), and `/ram/inventoryMessage`. The legacy `clockSpeed` field retains the hardware library's reported numeric value. Missing inventory does not affect live RAM or swap counters.
+
 ## Windows
 
 Processor, memory and graphics readings use the Windows facilities supported by systeminformation. NVIDIA driver telemetry is discovered when `nvidia-smi` is available.

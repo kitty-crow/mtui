@@ -6,6 +6,9 @@ export class CachedQuery<T> {
 
   constructor(private readonly query: () => Promise<T>, private readonly ttlMs = 60_000) {}
 
+  /** Last completed inventory remains readable while discovery is in flight. */
+  public peek(): T | null { return this.value; }
+
   public get(): Promise<T> {
     if (this.value !== null && Date.now() < this.expiresAt) return Promise.resolve(this.value);
     if (this.pending !== null) return this.pending;

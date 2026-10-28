@@ -8,6 +8,8 @@ import { NativeWindowsSensors } from '../collectors/windows/NativeWindowsSensors
 import { WindowsSensorBackend } from '../collectors/windows/WindowsSensorBackend.ts';
 import { WindowsSensorSetup } from '../collectors/windows/WindowsSensorSetup.ts';
 import { NativeSensorSetup } from '../collectors/shared/NativeSensorSetup.ts';
+import { MemoryInventory } from '../collectors/system/MemoryInventory.ts';
+import { LinuxMemoryInventory } from '../collectors/linux/LinuxMemoryInventory.ts';
 import { systemApi } from '../collectors/system/SystemApi.ts';
 import type { SensorSetupProvider } from '../collectors/contracts/SensorSetupProvider.ts';
 import { NvidiaTelemetry } from '../collectors/native/NvidiaTelemetry.ts';
@@ -29,6 +31,10 @@ export class PlatformFactory {
   }
 
   public nvidia(): NvidiaTelemetry { return new NvidiaTelemetry(new NativeCommandRunner()); }
+
+  public memoryInventory(): MemoryInventory {
+    return new MemoryInventory(systemApi, this.hostPlatform === 'linux' ? new LinuxMemoryInventory(new NativeCommandRunner()) : null);
+  }
 
   public sensorSetup(): SensorSetupProvider {
     if (this.hostPlatform === 'win32') return new WindowsSensorSetup();

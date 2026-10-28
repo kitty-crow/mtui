@@ -8,8 +8,8 @@ const cpu = z.object({
   usage: metric, user: metric, system: metric, temperature: metric, maxTemperature: metric,
   coreTemperatures: z.array(z.number().finite()), speed: metric, cores: z.array(core).max(65_536),
 });
-const module = z.object({ bank: z.string(), type: z.string(), size: z.number().nonnegative(), clockSpeed: metric, manufacturer: z.string(), formFactor: z.string(), ecc: z.boolean().nullable() });
-const memory = z.object({ total: z.number().nonnegative(), active: z.number().nonnegative(), available: z.number().nonnegative(), free: z.number().nonnegative(), cached: metric, swapTotal: z.number().nonnegative(), swapUsed: z.number().nonnegative(), modules: z.array(module).max(4096) });
+const module = z.object({ bank: z.string(), type: z.string(), size: z.number().nonnegative(), clockSpeed: metric, transferRate: metric.default(null), manufacturer: z.string(), formFactor: z.string(), ecc: z.boolean().nullable() });
+const memory = z.object({ total: z.number().nonnegative(), active: z.number().nonnegative(), available: z.number().nonnegative(), free: z.number().nonnegative(), cached: metric, swapTotal: z.number().nonnegative(), swapUsed: z.number().nonnegative(), modules: z.array(module).max(4096), inventoryMessage: z.string().nullable().default(null) });
 const gpu = z.object({
   id: z.string(), model: z.string(), vendor: z.string(), bus: z.string(), driver: z.string(), sharedMemory: z.boolean(),
   usage: metric, memoryUsage: metric, memoryTotal: metric, memoryUsed: metric, temperature: metric,

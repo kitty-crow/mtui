@@ -19,7 +19,7 @@ describe('JSON resources', () => {
   test.each([
     ['/gpu/0/temp', '°C'], ['/gpu/1/temperature', '°C'], ['/gpu/0/vram/used', 'bytes'],
     ['/gpu/0/fan', '%'], ['/proc/cores/0/usage', '%'], ['/proc/cores/1/speed', 'GHz'],
-    ['/proc/coreTemperatures/0', '°C'], ['/ram/modules/0/size', 'bytes'], ['/ram/used', 'bytes'],
+    ['/ram/modules/0/transferRate', 'MT/s'], ['/proc/coreTemperatures/0', '°C'], ['/ram/modules/0/size', 'bytes'], ['/ram/used', 'bytes'],
   ])('exposes individual datapoints at %s', async (path, unit) => {
     const { router } = await demoMonitor();
     const response = router.handle(request(path));

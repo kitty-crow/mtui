@@ -33,7 +33,8 @@ export class DemoScenario {
     return {
       total: 32 * GiB, active, available: 32 * GiB - active, free: 8 * GiB, cached: 10 * GiB,
       swapTotal: 8 * GiB, swapUsed: 0.3 * GiB,
-      modules: Array.from({ length: 2 }, (_, id) => ({ bank: `DIMM ${id + 1}`, type: 'DDR5', size: 16 * GiB, clockSpeed: 5600, manufacturer: 'Example', formFactor: 'DIMM', ecc: false })),
+      inventoryMessage: null,
+      modules: Array.from({ length: 2 }, (_, id) => ({ bank: `DIMM ${id + 1}`, type: 'DDR5', size: 16 * GiB, clockSpeed: 5600, transferRate: 5600, manufacturer: 'Example', formFactor: 'DIMM', ecc: false })),
     };
   }
 

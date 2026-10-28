@@ -32,7 +32,7 @@ export class SessionFactory {
   private registerLocal(registry: CollectorRegistry, adapters: PlatformFactory): () => void {
     const sensors = new SharedSensorSource(adapters.sensors());
     registry.register('cpu', new CpuCollector(systemApi, sensors));
-    registry.register('memory', new MemoryCollector(systemApi));
+    registry.register('memory', new MemoryCollector(systemApi, adapters.memoryInventory()));
     registry.register('graphics', new GraphicsCollector(systemApi, adapters.graphics(), adapters.nvidia()));
     registry.register('sensors', new SensorCollector(sensors));
     return () => sensors.close();
