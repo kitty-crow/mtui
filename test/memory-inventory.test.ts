@@ -74,11 +74,16 @@ describe('physical memory inventory', () => {
   test('a stalled firmware query does not stall RAM sampling or start duplicate discovery', async () => {
     let calls = 0;
     const inventory = { read: () => { calls++; return new Promise<never>(() => {}); } };
-    const collector = new MemoryCollector(systemApi, inventory);
-    const result = await Promise.race([collector.collect(), Bun.sleep(500).then(() => null)]);
-    expect(result?.total).toBeGreaterThan(0);
-    expect(result?.inventoryMessage).toContain('Discovering');
-    await collector.collect();
+    const memory: Systeminformation.MemData = {
+      total: 16384, active: 4096, available: 12288, free: 2048, used: 14336,
+      buffcache: 10240, buffers: 0, cached: 10240, slab: 0, reclaimable: 0,
+      swaptotal: 8192, swapused: 0, swapfree: 8192, writeback: 0, dirty: 0,
+    };
+    // The test isolates firmware discovery from host OS latency.
+    const collector = new MemoryCollector({ ...systemApi, mem: async () => memory }, inventory);
+    const result = await Promise.race([collector.collect(), Bun.sleep(1000).then(() => null)]);
+    expect(result).toMatchObject({ total: 16384, inventoryMessage: 'Discovering physical memory inventory…' });
+    expect((await collector.collect()).total).toBe(16384);
     expect(calls).toBe(1);
   });
   test('DDR rates use MT/s in the table and scalar API', () => {
