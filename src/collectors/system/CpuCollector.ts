@@ -3,7 +3,7 @@ import type { Collector } from '../contracts/Collector.ts';
 import { CachedQuery } from '../shared/CachedQuery.ts';
 import { CpuMapper } from './CpuMapper.ts';
 import { CpuSensors } from './CpuSensors.ts';
-import type { SensorSource } from '../native/SensorSource.ts';
+import type { SharedSensorSource } from '../native/SharedSensorSource.ts';
 import { optional, type SystemApi } from './SystemApi.ts';
 
 /** Samples scheduler load while amortising processor inventory discovery. */
@@ -12,16 +12,15 @@ export class CpuCollector implements Collector<CpuMetrics> {
   private readonly inventory;
   private readonly mapper = new CpuMapper();
 
-  constructor(private readonly api: SystemApi, private readonly sensors: SensorSource | null = null) {
+  constructor(private readonly api: SystemApi, private readonly sensors: Pick<SharedSensorSource, 'peek'> | null = null) {
     this.inventory = new CachedQuery(() => api.cpu());
   }
 
   public async collect(): Promise<CpuMetrics> {
-    const [load, info, speed, thermal, sensors] = await Promise.all([
+    const [load, info, speed, thermal] = await Promise.all([
       this.api.currentLoad(), optional(this.inventory.get()),
       optional(this.api.cpuCurrentSpeed()), optional(this.api.cpuTemperature()),
-      this.sensors === null ? Promise.resolve(null) : optional(this.sensors.read()),
     ]);
-    return new CpuSensors().enrich(this.mapper.map(load, info, speed, thermal), sensors ?? []);
+    return new CpuSensors().enrich(this.mapper.map(load, info, speed, thermal), this.sensors?.peek() ?? []);
   }
 }
