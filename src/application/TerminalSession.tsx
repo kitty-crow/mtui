@@ -16,7 +16,7 @@ export class TerminalSession {
 
   public async run(session: MonitorSession, options: Options, endpoint: string | null): Promise<void> {
     const ascii = options.ascii || new TerminalCapabilities().requiresAscii();
-    const terminal = render(<App monitor={session.monitor} identity={session.identity} ascii={options.ascii} motion={options.motion && process.env['INK_SCREEN_READER'] !== 'true'} remote={session.remote} endpoint={endpoint} />, { alternateScreen: true, maxFps: 12, incrementalRendering: true, exitOnCtrlC: true });
+    const terminal = render(<App monitor={session.monitor} identity={session.identity} ascii={ascii} motion={options.motion && process.env['INK_SCREEN_READER'] !== 'true'} remote={session.remote} endpoint={endpoint} />, { alternateScreen: true, maxFps: 12, incrementalRendering: true, exitOnCtrlC: true });
     const terminate = () => { terminal.unmount(); };
     process.once('SIGTERM', terminate);
     session.monitor.start();
