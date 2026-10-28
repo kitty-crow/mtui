@@ -2,14 +2,12 @@ import type { Options } from '../cli/Options.ts';
 import { ApiConfig } from '../api/config/ApiConfig.ts';
 import { SessionFactory } from './SessionFactory.ts';
 import { HeadlessSession } from './HeadlessSession.ts';
-import { ConsoleEncoding } from './ConsoleEncoding.ts';
 import type { MonitorSession } from './MonitorSession.ts';
 
 /** Selects the operating mode and closes the monitor and API on every exit path. */
 export class Application {
   public async run(options: Options): Promise<void> {
     const session = await new SessionFactory().create(options);
-    const restoreConsole = options.serve ? () => {} : new ConsoleEncoding().prepare();
     try {
       if (options.serve) {
         const endpoint = session.startApi(new ApiConfig().read());
@@ -25,7 +23,7 @@ export class Application {
       const terminal = new TerminalSession();
       const endpoint = options.api && session.remote === null ? session.startApi(new ApiConfig().read()) : null;
       await terminal.run(session, options, endpoint);
-    } finally { restoreConsole(); session.close(); }
+    } finally { session.close(); }
   }
 
   private async print(session: MonitorSession, options: Options): Promise<void> {
